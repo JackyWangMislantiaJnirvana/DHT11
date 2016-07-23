@@ -19,7 +19,7 @@ int DHT11::getData(void)
 	/* Wake up DHT11 */
 	pinMode(dhtPin, OUTPUT);
 	digitalWrite(dhtPin, BUS_HIGH);
-	delay(18);
+	delay(20);
 	digitalWrite(dhtPin, BUS_LOW);
 
 	/* Wait for DHT11's reply */
