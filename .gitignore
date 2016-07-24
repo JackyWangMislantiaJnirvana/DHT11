@@ -27,3 +27,7 @@
 *.exe
 *.out
 *.app
+
+#eclipse meta files
+.project
+.cproject
