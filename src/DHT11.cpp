@@ -1,27 +1,13 @@
 #include <math.h>
-#include <string.h>
+#include <DHT11.h>
+
 #define BUS_HIGH LOW
 #define BUS_LOW HIGH
 
-class DHT11
-{
-	public:
-		DHT11(int dht11Pin);	// Constructor
-
-		int getTemp(void);		// Function that process the raw temperature data to the final result and return it
-		int getHumi(void);		// Function that process the raw humidity data to the final result and return it
-	private:
-		int buffer[40];	// Buffer for the data that recieved from DHT11
-		int dht11Pin;		// Variable that storage the pin number of DHT11
-
-		int getData(void);		// Function that connect with the hardware,
-								// and put the raw data into these two variables above
-};
-
 DHT11::DHT11(int dhtPin) 
 {
-	this -> dht11Pin = dhtPin;
-        memset(this->buffer,0,sizeof(this->buffer));							// Make the pin number can be accessed wherever in the class
+	this -> dht11Pin = dhtPin;							// Make the pin number can be accessed wherever in the class
+//	memset(this->buffer,0,sizeof(this->buffer));
 }
 
 
@@ -49,10 +35,10 @@ int DHT11::getData(void)
 	waitTime = micros();								// Reset the timer
 	while (digitalRead(dhtPin) == BUS_LOW)
 		if (micros() - waitTime >= 1000)
-                {
+		{
 			delay(100);
 			return -1;
-                }							// Connection time out, give up the connection
+		}												// Connection time out, give up the connection
 
 	/* Wait until finishing receiving the 80us reply signal */
 	waitTime = micros();								// Reset the timer
@@ -67,7 +53,7 @@ int DHT11::getData(void)
 	for (int bitCount = 0; bitCount < 40;)
 	{
 		/* Wait through the 50us bit signal */
-		while (digitalRead(dhtPin) == BUS_HIGH);			// Empty block
+		while (digitalRead(dhtPin) == BUS_HIGH);		// Empty block
 
 		/* Receive and  storage the data */
 			/* Get the length of the signal */
@@ -77,10 +63,10 @@ int DHT11::getData(void)
 		signalLen = micros() - waitTime;
 			/* Tell the signal means 1 or 0 */
 		if (signalLen > 20 && signalLen < 50)
-			this -> buffer[bitCount++] = 1;						// 1
+			this -> buffer[bitCount++] = 1;				// 1
 
 		if (signalLen > 50 && signalLen < 80)
-			this -> buffer[bitCount++] = 0;						// 0
+			this -> buffer[bitCount++] = 0;				// 0
 	}
 
 	/* Use the checksum to verify if the data received is correct */
@@ -96,7 +82,7 @@ int DHT11::getData(void)
 
 	caculatedChecksum = tempSum % 256;					// Cut off the number higher than 8 bit
 		/* Verify */
-	if 	(caculatedChecksum != receivedChecksum)
+	if	(caculatedChecksum != receivedChecksum)
 		return -3;										// Data incorrect
 }
 
