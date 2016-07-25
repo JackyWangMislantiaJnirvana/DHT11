@@ -1,5 +1,5 @@
 #include <math.h>
-#include "DHT11.h"
+#include <DHT11.h>
 
 #define BUS_HIGH LOW
 #define BUS_LOW HIGH
@@ -14,7 +14,6 @@ int DHT11::getData(void)
 {
 	/* Prepare */
 	int dhtPin = this -> dhtPin;
-	int buffer[40] = {0};								// Buffer for the data that recieved from DHT11
 	unsigned long waitTime = 0;							// NOTE: time in MICROSECONDS
 	unsigned long signalLen = 0;
 	int bitCount = 0;
@@ -69,12 +68,12 @@ int DHT11::getData(void)
 			/* Tell the signal means 1 or 0 */
 		if (signalLen > 20 && signalLen < 50)
 		{
-			buffer[bitCount] = 1;						// 1
+			this -> buffer[bitCount] = 1;						// 1
 			bitCount ++;
 		}
 		if (signalLen > 50 && signalLen < 80)
 		{
-			buffer[bitCount] = 0;						// 0
+			this -> buffer[bitCount] = 0;						// 0
 			bitCount ++;
 		}
 	}
@@ -83,7 +82,7 @@ int DHT11::getData(void)
 		/* Convert checksum that received from DHT11 */
 	for (int i = 0; i < 8; i ++)
 	{
-		receivedChecksum += buffer[39-i]*pow(2, i);
+		receivedChecksum += this->buffer[39-i] * pow(2, i);
 	}
 
 		/* Calculate checksum according to the data received */
@@ -92,7 +91,7 @@ int DHT11::getData(void)
 	{
 		for (int j = 0; j < 8; j ++)
 		{
-			tempSum += buffer[i] * pow(2, j);
+			tempSum += this->buffer[i] * pow(2, j);
 		}
 	}
 	caculatedChecksum = tempSum % 256;					// Cut off the number higher than 8 bit
@@ -101,9 +100,6 @@ int DHT11::getData(void)
 	{
 		return -3;										// Data incorrect
 	}
-
-	// To-Do: temperature and humidity data convert
-
 }
 
 int DHT11::getTemp(void)
