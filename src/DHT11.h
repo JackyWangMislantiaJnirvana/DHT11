@@ -11,9 +11,6 @@ class DHT11
 	private:
 		int buffer[40];			// Buffer for the data that received from DHT11
 		int dht11Pin;			// Variable that storage the pin number of DHT11
-	Private:
-		int buffer[40] = {0};	// Buffer for the data that received from DHT11
-		int dht11Pin = 0;		// Variable that storage the pin number of DHT11
 
 		int getData(void);		// Function that connect with the hardware,
 								// and put the raw data into these two variables above

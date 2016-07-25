@@ -1,5 +1,6 @@
 #include <math.h>
 #include <DHT11.h>
+#include <string.h>
 
 #define BUS_HIGH LOW
 #define BUS_LOW HIGH
@@ -7,7 +8,7 @@
 DHT11::DHT11(int dhtPin) 
 {
 	this -> dht11Pin = dhtPin;							// Make the pin number can be accessed wherever in the class
-//	memset(this->buffer,0,sizeof(this->buffer));
+	memset(this->buffer, 0, sizeof(this->buffer));
 }
 
 
