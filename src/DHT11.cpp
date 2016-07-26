@@ -5,9 +5,9 @@
 #define BUS_HIGH LOW
 #define BUS_LOW HIGH
 
-DHT11::DHT11(int dhtPin) 
+DHT11::DHT11(int dht11Pin)
 {
-	this -> dht11Pin = dhtPin;							// Make the pin number can be accessed wherever in the class
+	this -> dht11Pin = dht11Pin;							// Make the pin number can be accessed wherever in the class
 	memset(this->buffer, 0, sizeof(this->buffer));
 }
 
@@ -15,7 +15,7 @@ DHT11::DHT11(int dhtPin)
 int DHT11::getData(void) 
 {
 	/* Prepare */
-	int dhtPin = this -> dht11Pin;
+	int dht11Pin = this -> dht11Pin;
 	unsigned long waitTime = 0;							// NOTE: time in MICROSECONDS
 	unsigned long signalLen = 0;
 	int bitCount = 0;
@@ -24,17 +24,17 @@ int DHT11::getData(void)
 	long int caculatedChecksum = 0;
 
 	/* Wake up DHT11 */
-	pinMode(dhtPin, OUTPUT);
-	digitalWrite(dhtPin, BUS_HIGH);
+	pinMode(dht11Pin, OUTPUT);
+	digitalWrite(dht11Pin, BUS_HIGH);
 	delay(20);
-	digitalWrite(dhtPin, BUS_LOW);
+	digitalWrite(dht11Pin, BUS_LOW);
 
 	/* Begin to listen from DHT11 */
-	pinMode(dhtPin, INPUT);
+	pinMode(dht11Pin, INPUT);
 
 	/* Wait for DHT11's reply */
 	waitTime = micros();								// Reset the timer
-	while (digitalRead(dhtPin) == BUS_LOW)
+	while (digitalRead(dht11Pin) == BUS_LOW)
 		if (micros() - waitTime >= 1000)
 		{
 			delay(100);
@@ -43,7 +43,7 @@ int DHT11::getData(void)
 
 	/* Wait until finishing receiving the 80us reply signal */
 	waitTime = micros();								// Reset the timer
-	while ( digitalRead(dhtPin) == BUS_HIGH )
+	while ( digitalRead(dht11Pin) == BUS_HIGH )
 	{
 		if (micros() - waitTime >= 1000)
 			delay(100);
@@ -54,12 +54,12 @@ int DHT11::getData(void)
 	for (int bitCount = 0; bitCount < 40;)
 	{
 		/* Wait through the 50us bit signal */
-		while (digitalRead(dhtPin) == BUS_HIGH);		// Empty block
+		while (digitalRead(dht11Pin) == BUS_HIGH);		// Empty block
 
 		/* Receive and  storage the data */
 			/* Get the length of the signal */
 		waitTime = micros();
-		while (digitalRead(dhtPin) == BUS_LOW);			// Empty block
+		while (digitalRead(dht11Pin) == BUS_LOW);			// Empty block
 
 		signalLen = micros() - waitTime;
 			/* Tell the signal means 1 or 0 */
@@ -77,9 +77,9 @@ int DHT11::getData(void)
 
 		/* Calculate checksum according to the data received */
 	int tempSum = 0;									// Variable for temporary usage
-	for (int i = 0; i < 32; )
+	for (int i = 0; i < 32; i++)
 		for (int j = 7; j >= 0; j --)
-			tempSum += this->buffer[i++] * pow(2, j);
+			tempSum += this->buffer[i] * pow(2, j);
 
 	caculatedChecksum = tempSum % 256;					// Cut off the number higher than 8 bit
 		/* Verify */
@@ -89,7 +89,21 @@ int DHT11::getData(void)
 
 int DHT11::getTemp(void)
 {
-	// To-Do: temperature data calculation
+	/* Declare variables */
+	int temp = 0;
+	int returnValue = 0;
+
+	/* Get data from DHT11 */
+	returnValue = getData();
+	if (returnValue == -1 || returnValue == -2 || returnValue == -3)
+		return returnValue;								// Return the error message
+
+	/* Get the raw temperature out of the buffer and return it */
+	for (int i = 0; i < 7; i++)
+	{
+		Temp += this -> buffer[23-i] * pow(2, i);
+	}
+	return temp;
 }
 
 int DHT11::getHumi(void)
