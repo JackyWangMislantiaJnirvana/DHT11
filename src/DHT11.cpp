@@ -54,12 +54,14 @@ int DHT11::getData(void)
 	for (int bitCount = 0; bitCount < 40;)
 	{
 		/* Wait through the 50us bit signal */
-		while (digitalRead(dht11Pin) == BUS_HIGH);		// Empty block
+		while (digitalRead(dht11Pin) == BUS_HIGH)
+			;
 
 		/* Receive and  storage the data */
 			/* Get the length of the signal */
 		waitTime = micros();
-		while (digitalRead(dht11Pin) == BUS_LOW);			// Empty block
+		while (digitalRead(dht11Pin) == BUS_LOW)
+			;
 
 		signalLen = micros() - waitTime;
 			/* Tell the signal means 1 or 0 */
@@ -77,8 +79,8 @@ int DHT11::getData(void)
 
 		/* Calculate checksum according to the data received */
 	int tempSum = 0;									// Variable for temporary usage
-	for (int i = 0; i < 32; i++)
-		for (int j = 7; j >= 0; j --)
+	for (int i = 0; i < 32;)
+		for (int j = 7; j >= 0; j--, i++)
 			tempSum += this->buffer[i] * pow(2, j);
 
 	caculatedChecksum = tempSum % 256;					// Cut off the number higher than 8 bit
@@ -93,20 +95,30 @@ int DHT11::getTemp(void)
 	int temp = 0;
 	int returnValue = 0;
 
-	/* Get data from DHT11 */
+	/* Call the getData() function */
 	returnValue = getData();
 	if (returnValue == -1 || returnValue == -2 || returnValue == -3)
 		return returnValue;								// Return the error message
 
 	/* Get the raw temperature out of the buffer and return it */
 	for (int i = 0; i < 7; i++)
-	{
 		Temp += this -> buffer[23-i] * pow(2, i);
-	}
 	return temp;
 }
 
 int DHT11::getHumi(void)
 {
-	// To-Do: humidity data calculation
+	/* Declare variables */
+	int humi = 0;
+	int returnValue = 0;
+
+	/* Call the getData() function */
+	returnValue = getData();
+	if (returnValue == -1 || returnValue == -2 || returnValue == -3)
+		return returnValue;
+
+	/* Get data from the buffer */
+	for (int i = 0; i < 7; i++)
+		humi += this -> buffer[i] * pow(2, j);
+	return humi;
 }
