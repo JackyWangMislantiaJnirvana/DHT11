@@ -1,6 +1,8 @@
 #ifdef DHT11
 #define DHT11
 
+#include "Arduino.h"			// Import the standard arduino library
+
 class DHT11
 {
 	public:

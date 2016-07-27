@@ -1,5 +1,6 @@
+#include "DHT11.h"
+#include "Arduino.h"
 #include <math.h>
-#include <DHT11.h>
 #include <string.h>
 
 #define BUS_HIGH LOW
