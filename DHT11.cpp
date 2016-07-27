@@ -1,5 +1,5 @@
-#include "DHT11.h"
-#include "Arduino.h"
+#include <DHT11.h>
+#include <Arduino.h>
 #include <math.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@
 
 DHT11::DHT11(int dht11Pin)
 {
-	this -> dht11Pin = dht11Pin;							// Make the pin number can be accessed wherever in the class
+	this -> dht11Pin = dht11Pin;						// Make the pin number can be accessed wherever in the class
 	memset(this->buffer, 0, sizeof(this->buffer));
 }
 
@@ -103,7 +103,7 @@ int DHT11::getTemp(void)
 
 	/* Get the raw temperature out of the buffer and return it */
 	for (int i = 0; i < 7; i++)
-		Temp += this -> buffer[23-i] * pow(2, i);
+		temp += this -> buffer[23-i] * pow(2, i);
 	return temp;
 }
 
@@ -120,6 +120,6 @@ int DHT11::getHumi(void)
 
 	/* Get data from the buffer */
 	for (int i = 0; i < 7; i++)
-		humi += this -> buffer[i] * pow(2, j);
+		humi += this -> buffer[23-i] * pow(2, i);
 	return humi;
 }
