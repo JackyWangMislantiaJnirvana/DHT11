@@ -3,13 +3,15 @@
 #include <math.h>
 #include <string.h>
 
-#define BUS_HIGH LOW
-#define BUS_LOW HIGH
 
 DHT11::DHT11(int dht11Pin)
 {
 	this -> dht11Pin = dht11Pin;						// Make the pin number can be accessed wherever in the class
-	memset(this->buffer, 0, sizeof(this->buffer));
+	memset(this->buffer, 0, sizeof(this->buffer));		// Init the buffer
+
+	/* Give the bus a original state */
+	pinMode(dht11Pin, OUTPUT);
+	digitalWrite(dht11Pin, HIGH);
 }
 
 
@@ -26,17 +28,19 @@ int DHT11::getData(void)
 
 	/* Wake up DHT11 */
 	pinMode(dht11Pin, OUTPUT);
-	digitalWrite(dht11Pin, BUS_HIGH);
+	digitalWrite(dht11Pin, LOW);
 	delay(20);
-	digitalWrite(dht11Pin, BUS_LOW);
+	digitalWrite(dht11Pin, HIGH);
+	delayMicroseconds(40);
+	digitalWrite(dht11Pin, LOW);
 
 	/* Begin to listen from DHT11 */
 	pinMode(dht11Pin, INPUT);
 
 	/* Wait for DHT11's reply */
 	waitTime = micros();								// Reset the timer
-	while (digitalRead(dht11Pin) == BUS_LOW)
-		if (micros() - waitTime >= 1000)
+	while (digitalRead(dht11Pin) != HIGH)
+		if (micros() - waitTime >= 1000000)
 		{
 			delay(100);
 			return -1;
@@ -44,9 +48,9 @@ int DHT11::getData(void)
 
 	/* Wait until finishing receiving the 80us reply signal */
 	waitTime = micros();								// Reset the timer
-	while ( digitalRead(dht11Pin) == BUS_HIGH )
+	while ( digitalRead(dht11Pin) != LOW )
 	{
-		if (micros() - waitTime >= 1000)
+		if (micros() - waitTime >= 1000000)
 			delay(100);
 			return -2;									// Connection time out, give up the connection
 	}
@@ -55,13 +59,13 @@ int DHT11::getData(void)
 	for (int bitCount = 0; bitCount < 40;)
 	{
 		/* Wait through the 50us bit signal */
-		while (digitalRead(dht11Pin) == BUS_HIGH)
+		while (digitalRead(dht11Pin) == LOW)
 			;
 
 		/* Receive and  storage the data */
 			/* Get the length of the signal */
 		waitTime = micros();
-		while (digitalRead(dht11Pin) == BUS_LOW)
+		while (digitalRead(dht11Pin) == HIGH)
 			;
 
 		signalLen = micros() - waitTime;
@@ -88,6 +92,8 @@ int DHT11::getData(void)
 		/* Verify */
 	if	(caculatedChecksum != receivedChecksum)
 		return -3;										// Data incorrect
+	
+	return 0;
 }
 
 int DHT11::getTemp(void)
@@ -98,7 +104,7 @@ int DHT11::getTemp(void)
 
 	/* Call the getData() function */
 	returnValue = getData();
-	if (returnValue == -1 || returnValue == -2 || returnValue == -3)
+	if (returnValue != 0)
 		return returnValue;								// Return the error message
 
 	/* Get the raw temperature out of the buffer and return it */
@@ -115,7 +121,7 @@ int DHT11::getHumi(void)
 
 	/* Call the getData() function */
 	returnValue = getData();
-	if (returnValue == -1 || returnValue == -2 || returnValue == -3)
+	if (returnValue != 0)
 		return returnValue;
 
 	/* Get data from the buffer */
