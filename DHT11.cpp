@@ -25,7 +25,7 @@ int DHT11::getData(void)
 	int checksum = 0;
 	long int receivedChecksum = 0;
 	long int caculatedChecksum = 0;
-
+	
 	/* Wake up DHT11 */
 	pinMode(dht11Pin, OUTPUT);
 	digitalWrite(dht11Pin, LOW);
@@ -36,7 +36,7 @@ int DHT11::getData(void)
 
 	/* Begin to listen from DHT11 */
 	pinMode(dht11Pin, INPUT);
-
+	
 	/* Wait for DHT11's reply */
 	waitTime = micros();								// Reset the timer
 	while (digitalRead(dht11Pin) != HIGH)
@@ -48,15 +48,17 @@ int DHT11::getData(void)
 
 	/* Wait until finishing receiving the 80us reply signal */
 	waitTime = micros();								// Reset the timer
-	while ( digitalRead(dht11Pin) != LOW )
+	while (digitalRead(dht11Pin) != LOW )
 	{
 		if (micros() - waitTime >= 1000000)
+		{
 			delay(100);
 			return -2;									// Connection time out, give up the connection
+		}
 	}
 	
 	/* Receive data, 1 bit each loop */
-	for (int bitCount = 0; bitCount < 40;)
+	for (int bitCount = 0; bitCount < 40; bitCount++)
 	{
 		/* Wait through the 50us bit signal */
 		while (digitalRead(dht11Pin) == LOW)
@@ -70,26 +72,33 @@ int DHT11::getData(void)
 
 		signalLen = micros() - waitTime;
 			/* Tell the signal means 1 or 0 */
-		if (signalLen > 20 && signalLen < 50)
-			this -> buffer[bitCount++] = 1;				// 1
+		if (signalLen > 50)
+			this -> buffer[bitCount] = 1;				// 1
 
-		if (signalLen > 50 && signalLen < 80)
-			this -> buffer[bitCount++] = 0;				// 0
+		if (signalLen < 50)
+			this -> buffer[bitCount] = 0;				// 0
 	}
+	
+	for (int i = 0; i < 40; i++)
+		Serial.print(this->buffer[i]);
 
 	/* Use the checksum to verify if the data received is correct */
 		/* Convert checksum that received from DHT11 */
+	receivedChecksum = 0;
 	for (int i = 0; i < 8; i ++)
 		receivedChecksum += this->buffer[39-i] * pow(2, i);
 
 		/* Calculate checksum according to the data received */
 	int tempSum = 0;									// Variable for temporary usage
 	for (int i = 0; i < 32;)
-		for (int j = 7; j >= 0; j--, i++)
-			tempSum += this->buffer[i] * pow(2, j);
+		for (int j = 7; j >= 0; j--)
+			tempSum += this->buffer[i++] * pow(2, j);
 
 	caculatedChecksum = tempSum % 256;					// Cut off the number higher than 8 bit
 		/* Verify */
+		
+		Serial.print(caculatedChecksum);Serial.println(receivedChecksum);	//debuging message
+		
 	if	(caculatedChecksum != receivedChecksum)
 		return -3;										// Data incorrect
 	
@@ -108,7 +117,7 @@ int DHT11::getTemp(void)
 		return returnValue;								// Return the error message
 
 	/* Get the raw temperature out of the buffer and return it */
-	for (int i = 0; i < 7; i++)
+	for (int i = 7; i >= 0; i--)
 		temp += this -> buffer[23-i] * pow(2, i);
 	return temp;
 }
@@ -125,7 +134,7 @@ int DHT11::getHumi(void)
 		return returnValue;
 
 	/* Get data from the buffer */
-	for (int i = 0; i < 7; i++)
+	for (int i = 7; i >= 0; i--)
 		humi += this -> buffer[23-i] * pow(2, i);
 	return humi;
 }
