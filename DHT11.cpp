@@ -117,7 +117,7 @@ int DHT11::getTemp(void)
 		return returnValue;								// Return the error message
 
 	/* Get the raw temperature out of the buffer and return it */
-	for (int i = 7; i >= 0; i--)
+	for (int i = 0; i < 8; i++)
 		temp += this -> buffer[23-i] * pow(2, i);
 	return temp;
 }
@@ -134,7 +134,7 @@ int DHT11::getHumi(void)
 		return returnValue;
 
 	/* Get data from the buffer */
-	for (int i = 7; i >= 0; i--)
+	for (int i = 0; i < 8; i++)
 		humi += this -> buffer[23-i] * pow(2, i);
 	return humi;
 }
