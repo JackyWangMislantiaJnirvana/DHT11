@@ -1,6 +1,3 @@
-#ifdef DHT11
-#define DHT11
-
 #include "Arduino.h"			// Import the standard arduino library
 
 class DHT11
@@ -18,4 +15,3 @@ class DHT11
 								// and put the raw data into these two variables above
 };
 
-#endif
